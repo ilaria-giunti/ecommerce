@@ -3,8 +3,6 @@ import pandas as pd
 import sys
 import os
 import numpy as np
-import locale
-locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 import pandas_profiling
 
 
