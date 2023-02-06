@@ -3,6 +3,8 @@ import pandas as pd
 import sys
 import os
 import numpy as np
+import locale
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 import pandas_profiling
 
 
@@ -21,7 +23,8 @@ def validate_file(file):
 # sidebar
 with st.sidebar:
     uploader_file = st.file_uploader("Upload .csv or .xlsx files not exceeding 10MB")
-    budget = st.number_input("Qual è il tuo budget")
+    st.markdown("[Clicca qui per scaricare un Dataset di esempio](https://docs.google.com/spreadsheets/d/1YlKiVthYtGZbh0mrIHDf7DkTUMaAFuuCjgQ9wOc8BqI/edit#gid=0)", unsafe_allow_html=False)
+    budget = st.number_input("Quanto spendi mensilmente in advertising")
     button = st.button("Submit")
 
 if button:
@@ -49,7 +52,7 @@ if uploader_file is not None:
                 client2orders = df[df.groupby('customer_id').order_id.transform('count') > 1].customer_id.nunique()
                 repurchaserate = round(client2orders/client*100, 2)
                 orders = df['order_id'].count()
-                COC = round(orders/client, 3)
+                COC = round(orders/client, 2)
                 return client, client2orders, repurchaserate, orders, COC
 
             client, client2orders, repurchaserate, orders, COC = get_customer_metrics()
@@ -149,21 +152,47 @@ if uploader_file is not None:
             
             with st.container():
                 if repmonth==0:
-                    st.write(f"""il tuo CAC Overall è {cost_of_acquisition}€""")
-                    st.write(f"\nHai {client} clienti e solo il {repurchaserate}% fa più di un ordine")
-                    st.write(f"\nInfatti in media i tuoi clienti fanno {COC} ordini")
-                    st.write(f"\nIl tuo LTV a 90 giorni è {average_ltv3mesi}€")
-                    st.write(f"\nTra il 1 e il 2 ordine passano {average_timetorepurchase} giorni")
-                    st.write(f"\nnNon abbiamo abbastanza dati per dirti qual è la percentuale di acquisto ogni mese. Dobbiamo avere almeno 8 mesi di storico")
+                    st.header("Ecco alcuni KPI sul tuo eCom:")
+                    st.markdown(f"""
+                    - il tuo CAC Overall è di {cost_of_acquisition}€
+                    - Hai {client} clienti e solo il {repurchaserate}% fa più di un ordine
+                    - Infatti in media i tuoi clienti fanno {COC} ordini
+                    - Il tuo LTV a 90 giorni è {average_ltv3mesi}€
+                    - Non abbiamo abbastanza dati per dirti qual è la percentuale di acquisto ogni mese. Dobbiamo avere almeno 8 mesi di storico
+                    """)
+
                 else:
-                    st.write(f"""il tuo CAC Overall è {cost_of_acquisition}€""")
-                    st.write(f"\nHai {client} clienti e solo il {repurchaserate}% fa più di un ordine")
-                    st.write(f"\nInfatti in media i tuoi clienti fanno {COC} ordini")
-                    st.write(f"\nIl tuo LTV a 90 giorni è {average_ltv3mesi}€")
-                    st.write(f"\nTra il 1 e il 2 ordine passano {average_timetorepurchase} giorni")
-                    st.write(f"\nSolo {repmonth}% dei tuoi clienti riacquista ogni mese")
+                    st.header("Ecco alcuni KPI sul tuo eCom:")
+                    st.markdown(f"""
+                    - il tuo CAC Overall è di {cost_of_acquisition}€
+                    - Hai {client} clienti e solo il {repurchaserate}% fa più di un ordine
+                    - Infatti in media i tuoi clienti fanno {COC} ordini
+                    - Il tuo LTV a 90 giorni è {average_ltv3mesi}€
+                    - Solo {repmonth}% dei tuoi clienti riacquista ogni mese
+                    """)
         else:
             st.error("Kindly upload only .csv or .xlsx files")
 else:
     st.title("eCommerce Data")
     st.info("Upload your data in the left sidebar to generate a profiling report")
+
+    st.header("Come creare il tuo Dataset")
+    st.subheader("Crea un Dataset con le seguenti colonne:")
+    st.write("Fai attenzione a chiamare le colonne esattamente in questo modo")
+    st.markdown("""
+- order_id
+- customer_id
+- order_date
+- order_total
+""")
+    st.subheader("Le colonne dovranno essere nel seguente formato e contenere queste info:")
+    st.markdown("""
+- order_id = contiene l'ID Ordine
+- customer_id= può essere l'indirizzo email o nome e cognome del cliente
+- order_date = deve contenere la data in questo formato YYYY-MM-DD, es: 2023-10-10
+- order_total = deve contenere il totale ordine. Dividi i decimali con il punto, es: 80.10
+""")
+
+
+
+
